@@ -6,6 +6,7 @@
 
 import './bootstrap';
 import { createApp } from 'vue';
+import router from "./router/index.js";
 
 /**
  * Next, we will create a fresh Vue application instance. You may then begin
@@ -15,8 +16,8 @@ import { createApp } from 'vue';
 
 const app = createApp({});
 
-import Index from './components/Index.vue';
-app.component('index', Index);
+import apprender from './components/main/AppRender.vue';
+app.component('apprender', apprender);
 
 /**
  * The following block of code may be used to automatically register your
@@ -36,4 +37,4 @@ app.component('index', Index);
  * scaffolding. Otherwise, you will need to add an element yourself.
  */
 
-app.mount('#app');
+app.use(router).mount('#app');

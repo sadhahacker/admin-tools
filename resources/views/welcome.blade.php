@@ -15,13 +15,13 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/apexcharts@3.37.1/dist/apexcharts.css"
           integrity="sha256-4MX+61mt9NVvvuPjUWdUdyfZfxSB1/Rf9WtqRHgG5S0=" crossorigin="anonymous">
 
-    @vite(['resources/js/app.js','resources/js/app.css'])
+    @vite(['resources/js/app.js','resources/css/app.css'])
 </head>
 
 <body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
 <div id="app">
-    <index>
-    </index>
+    <AppRender>
+    </AppRender>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.3.0/browser/overlayscrollbars.browser.es6.min.js"
         integrity="sha256-H2VM7BKda+v2Z4+DRy69uknwxjyDRhszjXFhsL4gD3w=" crossorigin="anonymous"></script>
