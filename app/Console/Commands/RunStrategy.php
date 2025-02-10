@@ -18,7 +18,7 @@ class RunStrategy extends Command
 
     public function handle()
     {
-        $symbol       = 'TRXUSDT';
+        $symbol       = 'BNBUSDT';
         $timeInterval = '1h';
         $limit        = 1500;
 
