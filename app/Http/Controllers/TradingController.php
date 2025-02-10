@@ -50,6 +50,13 @@ class TradingController extends Controller
                 'short' => $this->shortPosition($request->coin, $request->quantity, $request->price, $request->tp, $request->sl, $request->leverage),
             };
 
+
+            foreach ($response as $values) {
+                if(!isset($values['orderId'])){
+                    return response()->json(['message' => 'Trade execution failed', 'error' => 'Trade Error']);
+                }
+            }
+
             return response()->json(['message' => 'Trade executed successfully', 'data' => $response], 200);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Trade execution failed', 'error' => $e->getMessage()], 500);
@@ -175,7 +182,7 @@ class TradingController extends Controller
     {
         return $this->executeBatchTradePosition('sell', $coin, $quantity, $price, $tp, $sl, $leverage);
     }
-    private function getUsdtBalance()
+    public function getUsdtBalance()
     {
         $clientAccount = $this->account->getAccountInformation();
         foreach ($clientAccount['assets'] as $balance) {
@@ -185,5 +192,4 @@ class TradingController extends Controller
         }
         return 0;
     }
-
 }

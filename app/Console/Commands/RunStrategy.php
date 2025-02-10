@@ -2,113 +2,150 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\Binance\MarketDataController;
+use App\Http\Controllers\Binance\TradeController;
 use App\Http\Controllers\Trading\SampleTrading;
 use App\Http\Controllers\TradingController;
 use App\Models\Signals;
 use App\Models\TradingPositions;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
-use GuzzleHttp\Client;
-use Illuminate\Support\Collection;
+use Illuminate\Http\Request;
 
 class RunStrategy extends Command
 {
     protected $signature = 'strategy:run';
-
     protected $description = 'Run Machine Learning: Lorentzian Classification Strategy';
 
     public function handle()
     {
-        $symbol = 'BNBUSDT';
-        $timeInterval = '5m';
-        $limit = 500;
+        $symbol       = 'TRXUSDT';
+        $timeInterval = '1h';
+        $limit        = 1500;
 
-        // Fetch market data
-        $trading = new SampleTrading();
-        $data = $trading->market([
-            'symbol' => $symbol,
-            'limit' => $limit,
+        $settings = $this->tradeValues();
+
+        //changal values;
+        $tradeAmount  = $settings['balance'];
+        $leverage     = $settings['leverage'];
+        $takeProfit   = $settings['tp'];
+        $stopLoss     = $settings['sl'];
+
+        // Fetch market data from trading service.
+        $tradingService = new SampleTrading();
+
+        $marketData = $tradingService->market([
+            'symbol'   => $symbol,
+            'limit'    => $limit,
             'interval' => $timeInterval,
-            'tp' => 3,
-            'sl' => 3,
+            'tp'       => $takeProfit,
+            'sl'       => $stopLoss,
         ]);
 
-        if (empty($data) || !is_array($data)) {
-            return dd("No data available");
+        // Get the most recent signal from market data.
+        $signal = end($marketData);
+
+        $this->addSignalToDB($symbol, $signal);
+
+        $this->tradeIfPossible($leverage, $tradeAmount);
+    }
+
+    public function addSignalToDB($symbol, $data)
+    {
+        if (empty($data)) {
+            return;
         }
 
-        // Get the last trading signal
-        $lastSignal = Signals::where('symbol', $symbol)->latest()->first();
+        // Check if a pending signal already exists for the symbol.
+        $hasPending = Signals::where('symbol', $symbol)
+            ->where('status', 'pending')
+            ->exists();
 
-        // Get the latest market data point
-        $latestData = end($data);
-
-        // Ensure latest data is valid
-        if (!isset($latestData['signal'], $latestData['entry_price'], $latestData['open_time'], $latestData['tp'], $latestData['sl'])) {
-            return dd("Invalid market data received");
-        }
-
-        $newSignalSide = $latestData['signal'] === 'BUY' ? 'LONG' : 'SHORT';
-        $newEntryPrice = (string)$latestData['entry_price'];
-        $openTime = Carbon::createFromTimestampMs($latestData['open_time']);
-
-        // If no previous signal, insert a new one
-        if (!$lastSignal) {
+        if ($data['status'] === 'NEW SIGNAL' && !$hasPending) {
             Signals::create([
-                'symbol' => $symbol,
-                'side' => $newSignalSide,
-                'open_time' => $openTime,
-                'entry_price' => $newEntryPrice,
-                'take_profit' => $latestData['tp'],
-                'stop_loss' => $latestData['sl'],
-                'status' => 'pending',
-                'successful' => false
+                'symbol'      => $symbol,
+                'side'        => $data['signal'],
+                'open_time'   => Carbon::createFromTimestampMs($data['open_time']),
+                'entry_price' => $data['entry_price'],
+                'take_profit' => $data['tp'],
+                'stop_loss'   => $data['sl'],
+                'status'      => 'pending',
+                'successful'  => false,
             ]);
-        } // Insert a new signal if there's a "NEW SIGNAL" status and entry price matches
-        elseif ($latestData['status'] === "NEW SIGNAL" && (string)$lastSignal->entry_price === $newEntryPrice) {
-            Signals::create([
-                'symbol' => $symbol,
-                'side' => $newSignalSide,
-                'open_time' => $openTime,
-                'entry_price' => $newEntryPrice,
-                'take_profit' => $latestData['tp'],
-                'stop_loss' => $latestData['sl'],
-                'status' => 'pending',
-                'successful' => false
-            ]);
-        } // Update the last signal status if take profit (TP) is hit
-        elseif ($lastSignal) {
-            $isSuccess = $latestData['status'] === 'TP HIT';
-
-            Signals::where('entry_price', $lastSignal->entry_price)
+        } else if ($data['status'] !== 'NEW SIGNAL') {
+            Signals::where('symbol', $symbol)
+                ->where('status', 'pending')
                 ->update([
-                    'status' => 'completed',
-                    'successful' => $isSuccess
+                    'status'     => 'completed',
+                    'successful' => ($data['status'] ?? '') === 'TP HIT',
                 ]);
         }
+    }
 
-        // Fetch all pending trading signals
-        $tradingSignals = Signals::where('status', 'pending')->latest()->get();
+    public function tradeIfPossible($leverage, $amount)
+    {
+        // Retrieve pending signals sorted by creation time.
+        $signals = Signals::where('status', 'pending')->latest('created_at')->get();
 
-        $tradeableSignal = null;
-        $currentTime = Carbon::now();
+        $tradingController = new TradingController();
 
-        foreach ($tradingSignals as $signal) {
-            // Ensure open_time and created_at are parsed as Carbon instances
-            $openTime = Carbon::parse($signal->open_time);
-            $createdAt = Carbon::parse($signal->created_at);
+        // Cache cutoff time for signal validity.
+        $cutoffTime = Carbon::now()->subMinutes(5);
 
-            $openTimeValid = $openTime->lt($currentTime->copy()->subMinutes(5));
-            $createdTimeValid = $createdAt->addMinutes(5)->lt($currentTime);
-
-            if ($openTimeValid && $createdTimeValid) {
-                if (!$tradeableSignal || Carbon::parse($tradeableSignal->open_time)->lt($openTime)) {
-                    $tradeableSignal = $signal;
-                }
+        // Process each pending signal.
+        $signals->each(function ($signal) use ($tradingController, $amount, $leverage, $cutoffTime) {
+            // Check if the signal is older than 5 minutes and if there are any open trading positions.
+            if ($signal->created_at < $cutoffTime || TradingPositions::count() > 0) {
+                return; // Skip signals older than 5 minutes when positions exist.
             }
-        }
 
-        dd($tradeableSignal);
+            $tradeData = [
+                'action'   => $signal->side === 'BUT' ? 'long' : 'short',
+                'coin'     => $signal->symbol,
+                'quantity' => $amount,
+                'price'    => $signal->entry_price,
+                'tp'       => $signal->take_profit,
+                'sl'       => $signal->stop_loss,
+                'leverage' => $leverage,
+            ];
+
+            $result = $tradingController->executeTrade(new Request($tradeData));
+
+            $responseData = $result->getData(true); // Converts JsonResponse to an associative array.
+
+            if (isset($responseData['message']) && $responseData['message'] === 'Trade executed successfully') {
+                TradingPositions::create([
+                    'signal_id' => $signal->id,
+                    'amount'    => $amount,
+                    'status'    => 'pending',
+                    'execution_time' => Carbon::now(),
+                ]);
+            }
+        });
+    }
+
+    public function tradeValues()
+    {
+        $availableBalance = (new TradingController())->getUsdtBalance();
+        $riskPercentage = 23;
+        $profitGoal = 30;
+        $takeProfitPercentage = 3;
+
+        $profitGoalAmount = ($availableBalance * $profitGoal) / 100;
+
+        $positionSize = $profitGoalAmount / ($takeProfitPercentage / 100);
+
+        // Step 2: Calculate leverage
+        $leverage = ceil($positionSize / $availableBalance); // Round up leverage
+
+        // Step 3: Adjust position size based on rounded leverage
+        $adjustedPositionSize = $leverage * $availableBalance;
+
+        return [
+            'balance' => $availableBalance,
+            'leverage' => $leverage,
+            'amount' => round($adjustedPositionSize, 2),
+            'tp' => 3,
+            'sl' => 2.3,
+        ];
     }
 }
