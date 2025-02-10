@@ -606,6 +606,8 @@ class ComposerStaticInita7159c5237c3c2e75dbd1d23c85e732c
         'App\\Http\\Controllers\\Binance\\TradeController' => __DIR__ . '/../..' . '/app/Http/Controllers/Binance/TradeController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
         'App\\Http\\Controllers\\TradingController' => __DIR__ . '/../..' . '/app/Http/Controllers/TradingController.php',
+        'App\\Http\\Controllers\\Trading\\IndicatorController' => __DIR__ . '/../..' . '/app/Http/Controllers/Trading/IndicatorController.php',
+        'App\\Http\\Controllers\\Trading\\LCController' => __DIR__ . '/../..' . '/app/Http/Controllers/Trading/LCController.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',

@@ -32,6 +32,8 @@ class SetupController extends Controller
             // Prepare request options
             $options = $this->prepareRequestOptions($params);
 
+            $options['verify'] = false;
+
             // Send request
             $response = $this->http->request($method, $this->baseUrl . $endpoint, $options);
 

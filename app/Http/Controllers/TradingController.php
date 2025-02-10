@@ -144,17 +144,17 @@ class TradingController extends Controller
                 'side' => strtoupper($action == 'buy' ? 'sell' : 'buy'),
                 'symbol' => (string) $coin,
                 'type' => 'STOP_MARKET',
-                'quantity' => (string) $qty,
                 'timeInForce' => 'GTC',
-                'stopPrice' => (string) round($sl, $price_precision)
+                'stopPrice' => (string) round($sl, $price_precision),
+                'closePosition' => "true"
             ],
             [
                 'side' => strtoupper($action == 'buy' ? 'sell' : 'buy'),
                 'symbol' => (string) $coin,
                 'type' => 'TAKE_PROFIT_MARKET',
-                'quantity' => (string) $qty,
                 'timeInForce' => 'GTC',
-                'stopPrice' => (string) round($tp, $price_precision)
+                'stopPrice' => (string) round($tp, $price_precision),
+                'closePosition' => "true"
             ]
         ];
 

@@ -46,7 +46,7 @@ class MarketDataController extends Controller
         }
     }
 
-    function getCoinPrice($symbol)
+    public function getCoinPrice($symbol)
     {
         try {
             $ticker = $this->binance->sendBinanceRequest('fapi/v1/premiumIndex', ['symbol' => $symbol], 'GET');
@@ -55,4 +55,41 @@ class MarketDataController extends Controller
             return "Error: " . $e->getMessage();
         }
     }
+
+    public function fetchBinanceData($symbole, $interval = '1h', $limit = 1500)
+    {
+        try {
+            // Define your parameters (for example, symbol and interval)
+            $params = [
+                'symbol' => $symbole,
+                'interval' => $interval,
+                'limit' => $limit,
+            ];
+
+            $ticker = $this->binance->sendBinanceRequest("fapi/v1/klines", $params, "GET");
+
+            return $ticker;
+        } catch (\Exception $e) {
+
+            return 'Error: ' . $e->getMessage();
+        }
+    }
+
+    public function getFormatBinanceData($symbol, $interval, $limit = 1500)
+    {
+        $klines = $this->fetchBinanceData($symbol, $interval, $limit);
+        $data = [];
+        foreach ($klines as $k) {
+            $data[] = [
+                'open_time' => $k[0],
+                'open'      => (float)$k[1],
+                'high'      => (float)$k[2],
+                'low'       => (float)$k[3],
+                'close'     => (float)$k[4],
+                'volume'    => (float)$k[5],
+            ];
+        }
+        return $data;
+    }
+
 }
