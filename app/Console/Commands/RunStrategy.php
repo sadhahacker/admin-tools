@@ -11,6 +11,7 @@ use App\Models\TradingPositions;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class RunStrategy extends Command
 {
@@ -19,6 +20,14 @@ class RunStrategy extends Command
 
     public function handle()
     {
+        if (true) {
+            $currentTime = Carbon::now();
+
+            $runCount = Cache::increment('trade_command');
+
+            \Log::channel('trade')->info('Execution Time: ' . $currentTime . ' | Run Count: ' . $runCount);
+        }
+
         $symbol       = 'BNBUSDT';
         $timeInterval = '1h';
         $limit        = 1500;
