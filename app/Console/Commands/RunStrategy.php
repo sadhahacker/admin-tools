@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\Binance\MarketDataController;
 use App\Http\Controllers\Binance\TradeController;
 use App\Http\Controllers\Trading\SampleTrading;
 use App\Http\Controllers\TradingController;
@@ -98,11 +99,14 @@ class RunStrategy extends Command
                 return; // Skip signals older than 5 minutes when positions exist.
             }
 
+            // price reached increase 0.1 percentage
+            $getEntryPrice = $this->getTradeablePrice($signal->symbol,$signal->side,$signal->entry_price);
+
             $tradeData = [
-                'action'   => $signal->side === 'BUT' ? 'long' : 'short',
+                'action'   => $signal->side === 'BUY' ? 'long' : 'short',
                 'coin'     => $signal->symbol,
                 'quantity' => $amount,
-                'price'    => $signal->entry_price,
+                'price'    => $getEntryPrice,
                 'tp'       => $signal->take_profit,
                 'sl'       => $signal->stop_loss,
                 'leverage' => $leverage,
@@ -147,5 +151,24 @@ class RunStrategy extends Command
             'tp' => 3,
             'sl' => 2.3,
         ];
+    }
+
+    private function getTradeablePrice($symbol, $side, $price)
+    {
+        $currentPrice = (new MarketDataController())->getCoinPrice($symbol);
+
+        $priceMargin = $currentPrice * 0.001;
+
+        $side = strtoupper($side);
+
+        if ($side === 'BUY' && $price < $currentPrice + $priceMargin) {
+            return $currentPrice + $priceMargin;
+        }
+
+        if ($side === 'SELL' && $price > $currentPrice - $priceMargin) {
+            return $currentPrice - $priceMargin;
+        }
+
+        return $price;
     }
 }
