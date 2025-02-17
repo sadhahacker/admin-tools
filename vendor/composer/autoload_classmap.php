@@ -6,6 +6,8 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\Console\\Commands\\RunStrategy' => $baseDir . '/app/Console/Commands/RunStrategy.php',
+    'App\\Http\\Controllers\\Admin\\SignalsController' => $baseDir . '/app/Http/Controllers/Admin/SignalsController.php',
     'App\\Http\\Controllers\\Binance\\AccountController' => $baseDir . '/app/Http/Controllers/Binance/AccountController.php',
     'App\\Http\\Controllers\\Binance\\MarketDataController' => $baseDir . '/app/Http/Controllers/Binance/MarketDataController.php',
     'App\\Http\\Controllers\\Binance\\SetupController' => $baseDir . '/app/Http/Controllers/Binance/SetupController.php',
@@ -14,6 +16,9 @@ return array(
     'App\\Http\\Controllers\\TradingController' => $baseDir . '/app/Http/Controllers/TradingController.php',
     'App\\Http\\Controllers\\Trading\\IndicatorController' => $baseDir . '/app/Http/Controllers/Trading/IndicatorController.php',
     'App\\Http\\Controllers\\Trading\\LCController' => $baseDir . '/app/Http/Controllers/Trading/LCController.php',
+    'App\\Http\\Controllers\\Trading\\SampleTrading' => $baseDir . '/app/Http/Controllers/Trading/SampleTrading.php',
+    'App\\Models\\Signals' => $baseDir . '/app/Models/Signals.php',
+    'App\\Models\\TradingPositions' => $baseDir . '/app/Models/TradingPositions.php',
     'App\\Models\\User' => $baseDir . '/app/Models/User.php',
     'App\\Providers\\AppServiceProvider' => $baseDir . '/app/Providers/AppServiceProvider.php',
     'Attribute' => $vendorDir . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',

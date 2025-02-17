@@ -12,4 +12,9 @@ class TradingPositions extends Model
         'amount',
         'status',
     ];
+
+    public function signals()
+    {
+        return $this->belongsTo('Signals', 'signal_id', 'id');
+    }
 }

@@ -600,6 +600,8 @@ class ComposerStaticInita7159c5237c3c2e75dbd1d23c85e732c
     );
 
     public static $classMap = array (
+        'App\\Console\\Commands\\RunStrategy' => __DIR__ . '/../..' . '/app/Console/Commands/RunStrategy.php',
+        'App\\Http\\Controllers\\Admin\\SignalsController' => __DIR__ . '/../..' . '/app/Http/Controllers/Admin/SignalsController.php',
         'App\\Http\\Controllers\\Binance\\AccountController' => __DIR__ . '/../..' . '/app/Http/Controllers/Binance/AccountController.php',
         'App\\Http\\Controllers\\Binance\\MarketDataController' => __DIR__ . '/../..' . '/app/Http/Controllers/Binance/MarketDataController.php',
         'App\\Http\\Controllers\\Binance\\SetupController' => __DIR__ . '/../..' . '/app/Http/Controllers/Binance/SetupController.php',
@@ -608,6 +610,9 @@ class ComposerStaticInita7159c5237c3c2e75dbd1d23c85e732c
         'App\\Http\\Controllers\\TradingController' => __DIR__ . '/../..' . '/app/Http/Controllers/TradingController.php',
         'App\\Http\\Controllers\\Trading\\IndicatorController' => __DIR__ . '/../..' . '/app/Http/Controllers/Trading/IndicatorController.php',
         'App\\Http\\Controllers\\Trading\\LCController' => __DIR__ . '/../..' . '/app/Http/Controllers/Trading/LCController.php',
+        'App\\Http\\Controllers\\Trading\\SampleTrading' => __DIR__ . '/../..' . '/app/Http/Controllers/Trading/SampleTrading.php',
+        'App\\Models\\Signals' => __DIR__ . '/../..' . '/app/Models/Signals.php',
+        'App\\Models\\TradingPositions' => __DIR__ . '/../..' . '/app/Models/TradingPositions.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
