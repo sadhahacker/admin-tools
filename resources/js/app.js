@@ -4,8 +4,8 @@
  * building robust, powerful web applications using Vue and Laravel.
  */
 
-import './bootstrap';
 import { createApp } from 'vue';
+import App from './App.vue';
 import router from "./router/index.js";
 
 /**
@@ -16,8 +16,7 @@ import router from "./router/index.js";
 
 const app = createApp({});
 
-import apprender from './components/main/AppRender.vue';
-app.component('apprender', apprender);
+app.component('App', App);
 
 /**
  * The following block of code may be used to automatically register your

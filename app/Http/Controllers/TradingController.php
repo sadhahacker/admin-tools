@@ -127,7 +127,7 @@ class TradingController extends Controller
     public function executeBatchTradePosition($action, $coin, $quantity, $price, $tp, $sl, $leverage)
     {
         // Set leverage
-        $this->trade->addLeverage($coin, $leverage);
+        $this->trade->addLeverage($coin, $leverage+5);
 
         // Set position mode
         $this->trade->setPosition(true);
@@ -136,7 +136,7 @@ class TradingController extends Controller
         $price_precision = $this->market->get_price_precision($coin);
 
         // Calculate the quantity
-        $qty = round($quantity / $price, $qty_precision);
+        $qty = round(($quantity*$leverage) / $price, $qty_precision);
 
         $order = [
             [

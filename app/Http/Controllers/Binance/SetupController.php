@@ -25,6 +25,8 @@ class SetupController extends Controller
         // Add timestamp to params
         $params['timestamp'] = $this->getTimestamp();
 
+        $params['recvWindow'] = $this->setRecvWindow('10000');
+
         // Generate signature and add to params
         $params['signature'] = $this->generateSignature($params);
 
@@ -67,7 +69,8 @@ class SetupController extends Controller
             'query' => $params,  // Include query parameters
         ];
     }
-
-
-
+    public function setRecvWindow($seconds = "5000")
+    {
+        return $seconds;
+    }
 }

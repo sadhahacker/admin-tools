@@ -1,15 +1,19 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
 // Import your components
-import AppRender from '../components/main/AppRender.vue';
+import Dashboard from "./../components/pages/Dashboard.vue";
+import Signals from "@/components/pages/Signals.vue";
 
 // Define routes
 const routes = [
     {
-        path: '/home',
-        name: 'home',
-        component: AppRender,
+        path: '/',
+        component: Dashboard,
     },
+    {
+        path: '/signals',
+        component: Signals
+    }
 ];
 
 // Create and export the router
