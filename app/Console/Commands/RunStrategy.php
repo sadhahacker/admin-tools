@@ -29,7 +29,7 @@ class RunStrategy extends Command
         }
 
         $symbol       = 'BNBUSDT';
-        $timeInterval = '1h';
+        $timeInterval = '1m';
         $limit        = 1500;
 
         $settings = $this->tradeValues();
@@ -104,8 +104,8 @@ class RunStrategy extends Command
         // Process each pending signal.
         $signals->each(function ($signal) use ($tradingController, $amount, $leverage, $cutoffTime) {
             // Check if the signal is older than 5 minutes and if there are any open trading positions.
-            if ($signal->created_at < $cutoffTime || TradingPositions::count() > 0) {
-                return; // Skip signals older than 5 minutes when positions exist.
+            if ($signal->created_at < $cutoffTime) {
+                return; // Skip signals older than 5 minutes.
             }
 
             // price reached increase 0.1 percentage
